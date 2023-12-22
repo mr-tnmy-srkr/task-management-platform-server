@@ -8,7 +8,7 @@ const port = process.env.PORT || 5000;
 
 // middleware
 app.use(express.json());
-
+app.use(cors());
 require("dotenv").config();
 
 
@@ -19,17 +19,22 @@ const client = new MongoClient(process.env.DB_URI, {
     deprecationErrors: true,
   },
 });
-// const usersCollection = client.db("stayVistaDB").collection("users");
+
+const tasksCollection = client.db("taskManagementDB").collection("tasks");
 
 async function run() {
   try {
      // Connect the client to the server	(optional starting in v4.7)
-     await client.connect();
-    //Admin stat data
+  client.connect();
+  app.post("/tasks", async (req, res) => {
+    const tasks = req.body;
+    const result = await tasksCollection.insertOne(tasks);
+    res.send(result);
+  });
 
     // Send a ping to confirm a successful connection
     try {
-      await client.db("admin").command({ ping: 1 });
+    client.db("admin").command({ ping: 1 });
       console.log(
         "Pinged your deployment. You successfully connected to MongoDB!"
       );
